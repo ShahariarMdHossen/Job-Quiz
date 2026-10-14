@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MCQ Exam | 100 Questions</title>
+<style>
+  :root {
+    --bg:#f3f6fb; --card:#fff; --text:#172033; --muted:#65718a;
+    --primary:#3157d5; --primary-soft:#e9eeff; --green:#13804a;
+    --green-soft:#e6f7ed; --red:#c53333; --red-soft:#ffeded;
+    --border:#dce3ef; --amber:#8a5a00; --amber-soft:#fff4d6;
+  }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--bg); color:var(--text); font-family:"Noto Sans Bengali","Nirmala UI",Arial,sans-serif; line-height:1.55; }
+  .wrap { max-width:1120px; margin:auto; padding:20px 14px 48px; }
+  header { background:linear-gradient(135deg,#172554,#3157d5); color:#fff; border-radius:18px; padding:24px; margin-bottom:16px; }
+  header h1 { margin:0 0 6px; font-size:clamp(1.35rem,3vw,2rem); }
+  header p { margin:0; color:#e1e8ff; }
+  .stats { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:10px; margin:14px 0; }
+  .stat,.panel,.question,.result-card { background:var(--card); border:1px solid var(--border); border-radius:14px; }
+  .stat { padding:13px; } .stat small { display:block;color:var(--muted);font-size:.82rem; } .stat strong { font-size:1.25rem; }
+  .layout { display:grid; grid-template-columns:minmax(0,1fr) 250px; gap:16px; align-items:start; }
+  .questions { display:grid; gap:12px; }
+  .question { padding:18px; scroll-margin-top:14px; }
+  .qhead { display:flex; gap:10px; align-items:flex-start; margin-bottom:12px; }
+  .qnum { flex:0 0 36px; height:36px; display:grid; place-items:center; border-radius:10px; background:var(--primary-soft); color:var(--primary); font-weight:800; }
+  .qtext { font-weight:700; white-space:pre-wrap; }
+  .options { display:grid; grid-template-columns:1fr 1fr; gap:9px; }
+  .option { display:flex; gap:9px; align-items:flex-start; border:1px solid var(--border); padding:10px 12px; border-radius:10px; cursor:pointer; min-width:0; }
+  .option:hover { border-color:#9aaefb; background:#f8faff; }
+  .option input { margin-top:5px; accent-color:var(--primary); }
+  .option.selected { border-color:var(--primary); background:var(--primary-soft); }
+  .option.correct { border-color:var(--green); background:var(--green-soft); }
+  .option.wrong { border-color:var(--red); background:var(--red-soft); }
+  aside { position:sticky; top:12px; }
+  .panel { padding:15px; margin-bottom:12px; }
+  .panel h3 { margin:0 0 9px; font-size:1rem; }
+  .legend { display:grid; gap:7px; color:var(--muted); font-size:.86rem; }
+  .dot { display:inline-block; width:10px;height:10px;border-radius:3px;margin-right:7px;background:#d9deea; }
+  .dot.answered { background:var(--primary); } .dot.current { background:#f3b43d; }
+  .navgrid { display:grid; grid-template-columns:repeat(5,1fr); gap:6px; }
+  .navbtn { border:1px solid var(--border); background:#fff; border-radius:7px; padding:7px 0; cursor:pointer; color:var(--text); }
+  .navbtn.answered { background:var(--primary-soft); border-color:#aab9fa; color:var(--primary); font-weight:700; }
+  .navbtn.current { outline:2px solid #f3b43d; }
+  .navbtn.correct { background:var(--green-soft); border-color:#8dd2a8; color:var(--green); }
+  .navbtn.wrong { background:var(--red-soft); border-color:#f0a3a3; color:var(--red); }
+  .actions { display:flex; flex-wrap:wrap; gap:10px; margin:18px 0; }
+  button.primary,button.secondary,button.danger { border:0; border-radius:10px; padding:12px 17px; font-weight:700; cursor:pointer; font-size:.96rem; }
+  button.primary { background:var(--primary); color:#fff; } button.secondary { background:#e7ebf3;color:#26334d; } button.danger { background:#b42323;color:#fff; }
+  button:disabled { opacity:.55; cursor:not-allowed; }
+  .result { display:none; margin-top:20px; }
+  .result.show { display:block; }
+  .result h2 { margin:0 0 12px; }
+  .result-grid { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:10px; }
+  .result-card { padding:14px; } .result-card small { display:block;color:var(--muted); } .result-card strong { font-size:1.35rem; }
+  .score-banner { padding:20px; background:#e9eeff; border:1px solid #cbd5ff; border-radius:14px; margin-bottom:12px; }
+  .score-banner strong { font-size:2rem; color:var(--primary); }
+  .review-note { padding:12px 14px; background:var(--amber-soft); border-radius:10px; margin:12px 0; color:#6e4a00; }
+  .explanation { margin-top:10px; padding-top:9px; border-top:1px dashed var(--border); color:var(--muted); font-size:.92rem; }
+  .status { font-weight:700; margin-top:9px; }
+  .status.good { color:var(--green); } .status.bad { color:var(--red); } .status.skip { color:var(--muted); }
+  footer { color:var(--muted); font-size:.85rem; margin-top:22px; text-align:center; }
+  @media(max-width:850px) { .layout { grid-template-columns:1fr; } aside { position:static; order:-1; } .navgrid { grid-template-columns:repeat(10,1fr); } }
+  @media(max-width:560px) { .wrap{padding:12px 9px 30px;} header{padding:18px;} .stats{grid-template-columns:repeat(2,1fr);} .options{grid-template-columns:1fr;} .question{padding:13px;} .navgrid{grid-template-columns:repeat(8,1fr);} .result-grid{grid-template-columns:repeat(2,1fr);} }
+  @media print { body{background:#fff;} header,.stats,aside,.actions,#reviewActions,footer{display:none!important;} .wrap{max-width:none;padding:0;} .question,.result-card{break-inside:avoid;} .result{display:block!important;} }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>MCQ Model Test — 100 Questions</h1>
+    <p>সময় নিয়ে উত্তর দিন। প্রতিটি সঠিক উত্তরে +১, ভুল উত্তরে −০.৫, উত্তর না দিলে ০।</p>
+  </header>
+
+  <div class="stats" aria-label="Quiz overview">
+    <div class="stat"><small>মোট প্রশ্ন</small><strong>100</strong></div>
+    <div class="stat"><small>উত্তর দিয়েছেন</small><strong id="answeredTop">0</strong></div>
+    <div class="stat"><small>বাকি প্রশ্ন</small><strong id="unansweredTop">100</strong></div>
+    <div class="stat"><small>অগ্রগতি</small><strong id="progressTop">0%</strong></div>
+  </div>
+
+  <div class="layout">
+    <main>
+      <div id="questions" class="questions"></div>
+      <div class="actions">
+        <button class="primary" id="submitBtn">পরীক্ষা জমা দিন</button>
+        <button class="secondary" id="clearBtn">সব উত্তর মুছুন</button>
+      </div>
+      <section id="result" class="result" aria-live="polite">
+        <h2>আপনার ফলাফল</h2>
+        <div id="scoreBanner" class="score-banner"></div>
+        <div id="resultGrid" class="result-grid"></div>
+        <div id="reviewNotice" class="review-note"></div>
+        <div id="reviewActions" class="actions">
+          <button class="secondary" id="printBtn">ফলাফল প্রিন্ট করুন</button>
+          <button class="primary" id="retakeBtn">আবার পরীক্ষা দিন</button>
+        </div>
+        <h2>উত্তর পর্যালোচনা</h2>
+        <div id="review" class="questions"></div>
+      </section>
+    </main>
+    <aside>
+      <div class="panel">
+        <h3>প্রশ্নে দ্রুত যান</h3>
+        <div id="navgrid" class="navgrid"></div>
+      </div>
+      <div class="panel">
+        <h3>মার্কিং নিয়ম</h3>
+        <div class="legend">
+          <div>🟢 সঠিক: +১</div>
+          <div>🔴 ভুল: −০.৫</div>
+          <div>⚪ উত্তর নেই: ০</div>
+          <div>সর্বোচ্চ নম্বর: ১০০</div>
+        </div>
+      </div>
+    </aside>
+  </div>
+  <footer>একটি স্বয়ংসম্পূর্ণ কুইজ পেজ · উত্তর নির্বাচন ও ফলাফল এই ব্রাউজারেই হিসাব করা হয়।</footer>
+</div>
+
+<script>
+/*
+  NOTE:
+  The question texts below are transcribed from the conversation.
+  Where an answer key was not reliably established, correct is null.
+  Null-key questions are displayed but excluded from scoring and flagged for review.
+*/
+const questions = [
+{q:"বাক্যের মৌলিক উপাদান কোনটি?",o:["বর্ণ","ভাব","খানি","শব্দ"],a:3},
+{q:"‘মহর্ষি’ কোন সমাস?",o:["দ্বিগু সমাস","তৎপুরুষ সমাস","দ্বন্দ্ব সমাস","কর্মধারয় সমাস"],a:3,note:"প্রদত্ত সংশোধন অনুযায়ী কর্মধারয় সমাস।"},
+{q:"আরিফ ও শরীফের বয়সের অনুপাত 5:3। আরিফের বয়স 20 বছর হলে, কত বছর পরে অনুপাত 7:5 হবে?",o:["5 বছর","6 বছর","8 বছর","10 বছর"],a:2},
+{q:"−1−i জটিল সংখ্যাটির আর্গুমেন্ট কত?",o:["225°","45°","135°","235°"],a:0},
+{q:"The adjective form of ‘brother’ is—",o:["brotherly","brotherhood","brethren","brother-in-law"],a:0},
+{q:"স্কুল > ইস্কুল — এটি কোন ধরনের ধ্বনির পরিবর্তন?",o:["আদি স্বরাগম","বিপ্রকর্ষ","অপিনিহিতি","পরাগত"],a:0},
+{q:"২১শে ফেব্রুয়ারিকে কোন সালে আন্তর্জাতিক মাতৃভাষা দিবস হিসেবে ঘোষণা করা হয়?",o:["২০০১","২০০৯","১৯৯৬","১৯৯৯"],a:3},
+{q:"HTML-এর পূর্ণরূপ কী?",o:["Hyper Text Markup Language","High Text Machine Language","Hyper Tool Mark Language","Hyper Transfer Mark Language"],a:0},
+{q:"মানুষের রক্তে গ্লুকোজের স্বাভাবিক মাত্রা কত?",o:["4.0–6.0 mmol/L","2.0–4.0 mmol/L","6.0–10.0 mmol/L","10.0–20.0 mmol/L"],a:0,note:"রক্তের গ্লুকোজের স্বাভাবিক মাত্রা পরীক্ষা-পদ্ধতি ও খালি পেটে/খাওয়ার পরের অবস্থার ওপর নির্ভর করে; এই প্রশ্নের প্রসঙ্গ যাচাই করুন।"},
+{q:"Identify the correct option: “The student was debarred from the examination”.",o:["sitting","appearing","taking","giving"],a:2},
+{q:"ডিজিটাল ডিভাইড বলতে কী বুঝায়?",o:["ইন্টারনেটের গতির পার্থক্য","অনলাইনভিত্তিক ব্যাংকিং ব্যবস্থা","তথ্য প্রযুক্তি ব্যবহারের পার্থক্য","ইন্টারনেট বাণিজ্যের পার্থক্য"],a:2},
+{q:"‘বানভট্ট’ কোন লেখকের ছদ্মনাম?",o:["নীহাররঞ্জন গুপ্ত","প্রেমেন্দ্র মিত্র","বিমল মিত্র","নারায়ণ গঙ্গোপাধ্যায়"],a:3},
+{q:"কোনটি জীবনানন্দ দাশের কাব্য নয়?",o:["বেলা শেষের গান","ধূসর পাণ্ডুলিপি","ঝরাপালক","মহাপৃথিবী"],a:0,note:"প্রশ্নের বই/সিলেবাস অনুযায়ী যাচাই করা ভালো।"},
+{q:"Pick the appropriate tag: “I'm late, ?”",o:["amn't I","am I","aren't I","isn't I"],a:2},
+{q:"পানির স্ফুটনাঙ্ক কত (স্বাভাবিক বায়ুচাপে)?",o:["50°C","100°C","0°C","75°C"],a:1},
+{q:"Select the correct passive: “Who opened the door?”",o:["By whom was the door opened?","The door was opened by whom?","By whom the door was opened?","By whom was opened the door?"],a:0},
+{q:"ভূমিকম্পের মাত্রা পরিমাপের জন্য কোন স্কেল ব্যবহৃত হয়?",o:["সেলসিয়াস","রিখটার","পাসকেল","ডেসিবেল"],a:1},
+{q:"NaCl কী?",o:["অ্যাসিড","ক্ষার","লবণ","গ্যাস"],a:2},
+{q:"কূটনীতিক ও রাজনীতিবিদ হুমায়ুন রশীদ চৌধুরী জাতিসংঘের কোন অঙ্গসংগঠনের সভাপতির দায়িত্ব পালন করেন?",o:["সাধারণ পরিষদ","নিরাপত্তা পরিষদ","অছি পরিষদ","আন্তর্জাতিক বিচার আদালত"],a:0},
+{q:"Indirect speech: He said to me, “How did you do it?”",o:["He enquired of me how I had done it.","He asked me if I had done it.","He asked me that I had done it.","He enquired of me if I had done it."],a:0},
+{q:"রক্ত জমাট বাঁধানো কোনটির কাজ?",o:["লোহিত কণিকা","অনুচক্রিকা","শ্বেত কণিকা","লসিকা কোষ"],a:1},
+{q:"Which does not add ‘ves’ in plural?",o:["Wife","Safe","Wolf","Leaf"],a:1},
+{q:"‘বাংলা সাহিত্যের কথা’ গ্রন্থটির রচয়িতা কে?",o:["ড. মুহম্মদ শহীদুল্লাহ","সুকুমার সেন","আহমেদ শরীফ","রবীন্দ্রনাথ ঠাকুর"],a:0},
+{q:"‘He acted on my advice.’ Choose the complex form.",o:["He acted on what I had advised.","I advised him and he acted.","I advised him that he acted.","He acted according to my advice."],a:0},
+{q:"f(x)=x²−(a+1/a)x+1 হলে, x-এর কোন মানের জন্য f(x)=0 হবে?",o:["0, a","0, 1/a","a, −1/a","a, 1/a"],a:3,note:"ধরা হচ্ছে a ≠ 0।"},
+{q:"একজন শিক্ষার্থী একটি সংখ্যাকে প্রথমে 20% হ্রাস করল, পরে প্রাপ্ত সংখ্যাকে 20% বৃদ্ধি করল। শেষ ও মূল সংখ্যার পার্থক্য 4 হলে মূল সংখ্যা কত?",o:["100","200","250","300"],a:0},
+{q:"কোনটি অপ্রাণিবাচক বহুবচনে ব্যবহৃত হয়?",o:["বৃন্দ","কুল","বর্গ","গুচ্ছ"],a:3},
+{q:"‘যৌবনের গান’ প্রবন্ধে লেখক কী হয়ে তরুণদের মহাদান গ্রহণ করতে চান?",o:["মধ্যমনি","দলপতি","সহযাত্রী","পূজারী"],a:null,note:"উত্তরটি নির্ভরযোগ্যভাবে যাচাই করা হয়নি।"},
+{q:"একটি সংখ্যার 15% এর মান 4.5 হলে, সংখ্যাটির 55% কত?",o:["9.5","12.5","16.5","15.5"],a:2},
+{q:"Pick the correct sentence.",o:["Wait until I do not return.","She is best girl in the class.","Which of the two boys is the taller?","I do not know nothing."],a:2},
+{q:"“The cuckoo is a singing bird.” Here ‘singing’ is a/an—",o:["verbal noun","infinitive","participle","gerund"],a:2},
+{q:"বাংলাদেশের কোন জেলাকে শস্যভান্ডার বলা হতো?",o:["চট্টগ্রাম","রাজশাহী","রংপুর","বরিশাল"],a:3,note:"প্রচলিত সাধারণ জ্ঞানসূত্রে বরিশালকে ‘বাংলার শস্যভান্ডার’ বলা হয়; প্রশ্নের নির্দিষ্ট উৎস মিলিয়ে নিন।"},
+{q:"BRI-এর প্রধান উদ্দেশ্য কী?",o:["সামরিক সহযোগিতা বৃদ্ধি","জলবায়ু পরিবর্তনের প্রভাব মোকাবেলা","স্বাস্থ্যসেবার উন্নয়ন ও গবেষণা","বাণিজ্য ও অবকাঠামো উন্নয়ন"],a:3},
+{q:"Choose the sentence in which ‘right’ is a noun.",o:["She's definitely the right person for the job.","He seated me on his right.","The bus came right on time.","He seems to think he can right all the wrongs of the world."],a:1},
+{q:"A synonym for ‘resentment’ is—",o:["panic","fear","anger","indulgence"],a:2},
+{q:"BRICS-এর প্রতিষ্ঠিত ব্যাংকের নাম কী?",o:["New Development Bank","Asian Infrastructure Bank","BRICS Finance Bank","Global Development Bank"],a:0},
+{q:"log₁₀(x)=2 হলে x কত?",o:["10","100","1000","20"],a:1},
+{q:"আয়তক্ষেত্রের কর্ণ 13 এবং এক বাহু 5 হলে ক্ষেত্রফল কত?",o:["60","50","48","65"],a:0},
+{q:"ব্লু ইকোনমি বলতে কী বুঝায়?",o:["শিল্পভিত্তিক অর্থনীতি","সমুদ্র ও জলসম্পদ নির্ভর টেকসই অর্থনীতি","তথ্যপ্রযুক্তিভিত্তিক অর্থনীতি","কৃষিভিত্তিক অর্থনীতি"],a:1},
+{q:"দুটি ক্রমিক সংখ্যার বর্গের অন্তর 23 হলে সংখ্যা দুটি কত?",o:["12,13","14,15","9,10","11,12"],a:3},
+{q:"“It’s no use crying ___ spilt milk.”",o:["for","on","at","over"],a:3},
+{q:"‘শকুনীমামা’-এর অর্থ কোনটি?",o:["কুৎসিত মামা","সৎমামা","কুচক্রী মামা","পাতানো মামা"],a:2},
+{q:"বাংলা সাহিত্যের আদি কবি কে?",o:["লুইপা","কাহ্নপা","চেনচনপা","ভুসুকুপা"],a:0},
+{q:"a+b+c=15 এবং a²+b²+c²=83 হলে ab+bc+ca কত?",o:["61","55","71","49"],a:2,note:"এই প্রশ্নটি আগে আলাদা করে ‘৮৮’ বলা হয়েছিল; নম্বর ৪৪ হিসেবে রাখা হয়েছে কারণ পরের তালিকায় ৮৮ নম্বরের আলাদা প্রশ্ন দেওয়া হয়েছে।"},
+{q:"SSD কী?",o:["মেমোরি ডিভাইস","প্রসেসর","নেটওয়ার্ক","সফটওয়্যার"],a:0,note:"SSD হলো storage device; অপশনগুলোর মধ্যে ‘মেমোরি ডিভাইস’ সবচেয়ে কাছের উত্তর।"},
+{q:"এক ব্যক্তি তার সম্পদের 12% দান, 20% স্ত্রীকে এবং অবশিষ্ট 81,60,000 টাকা সন্তানদের দিলেন। তার সম্পদের মোট মূল্য কত?",o:["12,00,000 টাকা","10,20,00,000 টাকা","1,20,00,000 টাকা","1,00,00,000 টাকা"],a:1},
+{q:"ভ্রান্ত বিশেষণ পদের বিশেষ্য রূপ কোনটি?",o:["বিভ্রম","ভ্রমী","ভ্রমা","ভ্রম"],a:3,note:"উত্তরটি নির্দিষ্ট ব্যাকরণসূত্র দিয়ে যাচাই করা ভালো।"},
+{q:"2,4,6,8,10,12,… অনুক্রমের 15তম পদ কত?",o:["50","34","24","30"],a:3},
+{q:"“The train is moving fast enough.” Underlined phrase is a/an—",o:["adjective phrase","verb phrase","adverbial phrase","noun phrase"],a:2},
+{q:"কোন বানানটি শুদ্ধ?",o:["বিভিষীকা","বিভীষিকা","বীভিষিকা","বীভিযীকা"],a:1},
+{q:"একটি মই দেয়ালের সঙ্গে ঠেকানো; ভূমির সঙ্গে কোণ 60° এবং মইয়ের দৈর্ঘ্য 10m। দেয়ালের উচ্চতা কত?",o:["5/3","10/3","5√3","10"],a:2},
+{q:"“They now sleep in separate rooms.” Verb ‘sleep’ is—",o:["transitive","intransitive","causative","copulative"],a:1},
+{q:"বিদ্যুৎ প্রবাহের একক কী?",o:["ভোল্ট","অ্যাম্পিয়ার","ওহম","জুল"],a:1},
+{q:"A person who leaves his/her native country to settle permanently in another is called a/an—",o:["immigrant","expatriate","emigrant","migrant"],a:2},
+{q:"pH scale-এর সাধারণ পরিসর কত?",o:["0–7","1–14","0–14","7–14"],a:2},
+{q:"‘তুমি না বলেছিলে আগামীকাল যাবে?’ এখানে ‘না’ কী অর্থে?",o:["না-বাচক","হ্যাঁ-বাচক","প্রশ্নবোধক","বিস্ময়সূচক"],a:1},
+{q:"Which word has the same singular and plural form?",o:["alumnus","terminus","bacillus","crossroads"],a:3},
+{q:"BIMSTEC-এর সদস্য নয় কোনটি?",o:["নেপাল","ভুটান","মালদ্বীপ","থাইল্যান্ড"],a:2},
+{q:"“Try to better the lot of the working classes.” ‘better’ is—",o:["adjective","adverb","noun","verb"],a:3},
+{q:"বাংলাদেশের মধ্য দিয়ে প্রবাহিত আন্তর্জাতিক নদীর সংখ্যা কত?",o:["51","54","56","57"],a:1,note:"সংখ্যাটি উৎসভেদে ভিন্ন হতে পারে; পরীক্ষার নির্দিষ্ট রেফারেন্স মিলিয়ে নিন।"},
+{q:"Which is correctly spelt?",o:["supercede","supersede","superseed","superceed"],a:1},
+{q:"“read between the lines” means—",o:["read with rapt attention","read quickly to save time","read only some lines","look for a meaning not openly stated"],a:3},
+{q:"বাংলাদেশের প্রধান বিচারপতি কে নিয়োগ দেন?",o:["প্রধানমন্ত্রী","রাষ্ট্রপতি","সুপ্রিম জুডিশিয়াল কাউন্সিল","আইন মন্ত্রণালয়"],a:1},
+{q:"k-এর মান কত হলে (x+1), x³+kx²+3x−2-এর একটি উৎপাদক হবে?",o:["3","6","10","−2"],a:2},
+{q:"বাক্যের ক্ষুদ্রাংশকে কী বলে?",o:["পদ","রূপ","শব্দমূল","ধ্বনি"],a:0},
+{q:"‘উদাত্ত পৃথিবী’ কাব্যগ্রন্থের রচয়িতা কে?",o:["সুফিয়া কামাল","বেগম রোকেয়া","সিকান্দার আবুজাফর","জসীমউদ্দীন"],a:2,note:"প্রশ্নের উৎস দিয়ে যাচাই করুন।"},
+{q:"‘গ্লোবাল সাউথ’ বলতে কী বুঝায়?",o:["দক্ষিণ গোলার্ধের দেশসমূহ","উন্নত দেশসমূহ","উন্নয়নশীল ও স্বল্পোন্নত দেশসমূহ","তেলসমৃদ্ধ দেশসমূহ"],a:2},
+{q:"রামাই পণ্ডিতের রচনা কোনটি?",o:["পদ্মাবতী","মধুমালতী","পদ্মপুরাণ","শূন্যপুরাণ"],a:3},
+{q:"‘মানুষ হও’ বাক্যে রয়েছে—",o:["উপদেশ","আদেশ","অনুরোধ","অনুনয়"],a:1},
+{q:"পোস্টাল কোড কী নির্দেশ করে?",o:["প্রাপকের এলাকা","ডাক বিভাগের ঠিকানা","পোস্ট অফিসের ঠিকানা","প্রেরকের ঠিকানা"],a:0},
+{q:"মুক্তিযুদ্ধে সবচেয়ে গুরুত্বপূর্ণ বীরত্ব খেতাব কোনটি?",o:["বীর উত্তম","বীর শ্রেষ্ঠ","বীর প্রতীক","বীর বিক্রম"],a:1},
+{q:"সূর্য-এর প্রতিশব্দ কোনটি?",o:["সুধাংশু","শশাঙ্ক","বিধু","আদিত্য"],a:3},
+{q:"ICC কোন অপরাধের বিচার করে?",o:["বাণিজ্য বিরোধ","যুদ্ধাপরাধ","শ্রম অপরাধ","মানবতাবিরোধী অপরাধ"],a:null,note:"যুদ্ধাপরাধ ও মানবতাবিরোধী অপরাধ—দুটিই ICC-এর এখতিয়ারভুক্ত হতে পারে; একটিমাত্র উত্তরবিশিষ্ট প্রশ্ন হিসেবে অস্পষ্ট, তাই স্কোরিং থেকে বাদ।"},
+{q:"WTO সদর দপ্তর কোথায়?",o:["জেনেভা","নিউইয়র্ক","ব্রাসেলস","ওয়াশিংটন ডিসি"],a:0},
+{q:"বাংলাদেশ LDC থেকে উন্নয়নশীল দেশে উন্নীত হবে কোন সালে বলে নির্ধারিত?",o:["2026","2027","2028","2021"],a:0},
+{q:"Binary 1010-এর দশমিক মান কত?",o:["4","10","12","14"],a:1},
+{q:"Antonym of meticulous:",o:["particular","careless","planned","calculated"],a:1},
+{q:"Paris Agreement relates to—",o:["trade liberalization","climate change","nuclear disarmament","human rights"],a:1},
+{q:"বাংলাদেশের বৃহত্তম দ্বীপ কোনটি?",o:["ভোলা","সেন্টমার্টিন","মহেশখালী","সন্দ্বীপ"],a:0},
+{q:"‘ঈশ্বর’ কবিতা নজরুলের কোন কাব্যগ্রন্থের?",o:["অগ্নিবীণা","সর্বহারা","সাম্যবাদী","চক্রবাক"],a:1,note:"উত্তরটি নির্দিষ্ট কবিতার সংকলন দিয়ে যাচাই করা ভালো।"},
+{q:"‘জন্ডিস ও বিবিধ বেলুন’ কোন রচনা?",o:["উপন্যাস","নাটক","গল্প","রম্যরচনা"],a:3,note:"প্রশ্নের উৎস দিয়ে যাচাই করুন।"},
+{q:"“Today is ___ gloomier than yesterday.”",o:["more","more than","much","very"],a:2},
+{q:"‘বক্তব্য’-এর সঠিক প্রকৃতি-প্রত্যয় কোনটি?",o:["বক্ + তব্য","বক্তা + অব্য","বক্ত্য + ব্য","বচ্ + তব্য"],a:0},
+{q:"স্বাভাবিক বয়স্ক লোকের চোখে স্পষ্ট দৃষ্টির ন্যূনতম দূরত্ব কত?",o:["5 cm","10 cm","25 cm","50 cm"],a:2},
+{q:"“The number of students seeking admission ___.”",o:["have increased","have been increased","is increased","has increased"],a:3},
+{q:"Which word can be both masculine and feminine?",o:["Gander","Drone","Spouse","Spinster"],a:2},
+{q:"Bretton Woods institutions are—",o:["IMF and World Bank","WTO and WHO","UNDP and UNICEF","ADB and AIIB"],a:0},
+{q:"বাংলাদেশের স্বাধীনতার ঘোষণাপত্র আনুষ্ঠানিকভাবে কবে জারি করা হয়?",o:["৭ মার্চ, ১৯৭১","১০ এপ্রিল, ১৯৭১","১৭ এপ্রিল, ১৯৭১","২৬ মার্চ, ১৯৭১"],a:1},
+{q:"বাংলাদেশের বৃহত্তম নৃ-গোষ্ঠী কোনটি?",o:["চাকমা","মারমা","গারো","ত্রিপুরা"],a:0},
+{q:"হরমুজ প্রণালী কোন দুটি জলভাগকে সংযুক্ত করেছে?",o:["লোহিত সাগর ও ভূমধ্যসাগর","পারস্য উপসাগর ও ওমান উপসাগর","পারস্য উপসাগর ও আরব সাগর","লোহিত সাগর ও আরব সাগর"],a:1},
+{q:"GSP+ হলো নিম্ন আয়ের/নিম্নমধ্যম আয়ের দেশগুলোর জন্য প্রদত্ত—",o:["মার্কিন যুক্তরাষ্ট্রের বাণিজ্য সুবিধা","ইউরোপীয় ইউনিয়নের বাণিজ্য সুবিধা","বিশ্বব্যাংক ঋণ সুবিধা","জাপানের বাণিজ্য সুবিধা"],a:1},
+{q:"“There is no credit in earning money illegally.” ‘earning’ is—",o:["infinitive","gerund","present participle","present continuous"],a:1},
+{q:"রূপপুর পারমাণবিক বিদ্যুৎ কেন্দ্র কোন দেশের সহযোগিতায়?",o:["চীন","রাশিয়া","জাপান","যুক্তরাষ্ট্র"],a:1},
+{q:"“At last the beast in him got ___ upper hand.”",o:["an","the","a","no article needed"],a:1},
+{q:"২০২৫ সালে বাংলাদেশ রেমিট্যান্স বাবদ কী পরিমাণ আয় করে?",o:["$22bn","$24bn","$26.88bn","$32.8bn"],a:2,note:"এখানে বছর বলতে ক্যালেন্ডার বছর নাকি অর্থবছর বোঝানো হয়েছে তা যাচাই প্রয়োজন; আগে দেওয়া উত্তরটি নিশ্চিত নয়।"},
+{q:"‘বাদশা’ শব্দের নারীবাচক শব্দ কোনটি?",o:["রানী","শাহজাদী","বেগম","মেম"],a:2},
+{q:"‘দুহিতা’-এর বিপরীত শব্দ কোনটি?",o:["পুত্র","কন্যা","স্ত্রী","স্বামী"],a:0},
+{q:"ইন্দো-প্যাসিফিক কৌশল মূলত—",o:["সাংস্কৃতিক বিনিময়","নিরাপত্তা ও অর্থনৈতিক সহযোগিতা","কৃষি উন্নয়ন","মহাকাশ গবেষণা"],a:1},
+{q:"‘চোরটাকে ধরা গেল না’ কোন বাচ্য?",o:["কর্মবাচ্য","কর্তৃবাচ্য","ভাববাচ্য","কর্ম-কর্তৃবাচ্য"],a:2},
+{q:"বিদ্যুৎ পরিবাহক কোনটি?",o:["প্লাস্টিক","রাবার","তামা","কাঠ"],a:2}
+];
+
+const state = { answers: Array(questions.length).fill(null), submitted:false, current:0 };
+const $ = id => document.getElementById(id);
+const labels = ["ক","খ","গ","ঘ"];
+function renderQuestions() {
+  $("questions").innerHTML = questions.map((item,i)=>`
+    <article class="question" id="q-${i}">
+      <div class="qhead"><div class="qnum">${i+1}</div><div class="qtext">${escapeHtml(item.q)}</div></div>
+      <div class="options">${item.o.map((opt,j)=>`
+        <label class="option ${state.answers[i]===j?'selected':''}" data-q="${i}" data-opt="${j}">
+          <input type="radio" name="q${i}" value="${j}" ${state.answers[i]===j?'checked':''} ${state.submitted?'disabled':''}>
+          <span><b>${labels[j]}.</b> ${escapeHtml(opt)}</span>
+        </label>`).join("")}</div>
+      ${state.submitted?reviewStatus(i):""}
+    </article>`).join("");
+  $("questions").querySelectorAll("input[type=radio]").forEach(input=>input.addEventListener("change",e=>{
+    if(state.submitted) return;
+    const i=Number(e.target.name.slice(1)); state.answers[i]=Number(e.target.value);
+    updateStats(); updateNav(); 
+    $("questions").querySelectorAll(`label[data-q="${i}"]`).forEach(el=>el.classList.toggle("selected",Number(el.dataset.opt)===state.answers[i]));
+  }));
+}
+function escapeHtml(s) { return String(s).replace(/[&<>"']/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])); }
+function reviewStatus(i) {
+  const q=questions[i], user=state.answers[i];
+  if(q.a===null) return `<div class="status skip">⚠ উত্তরমালা যাচাই প্রয়োজন — এই প্রশ্নের নম্বর হিসাব করা হয়নি।</div>${q.note?`<div class="explanation">${escapeHtml(q.note)}</div>`:""}`;
+  if(user===null) return `<div class="status skip">উত্তর দেননি · ০ নম্বর</div><div class="explanation">সঠিক উত্তর: ${labels[q.a]}. ${escapeHtml(q.o[q.a])}${q.note?`<br>${escapeHtml(q.note)}`:""}</div>`;
+  if(user===q.a) return `<div class="status good">সঠিক উত্তর · +১ নম্বর</div>${q.note?`<div class="explanation">${escapeHtml(q.note)}</div>`:""}`;
+  return `<div class="status bad">ভুল উত্তর · −০.৫ নম্বর</div><div class="explanation">আপনার উত্তর: ${labels[user]}. ${escapeHtml(q.o[user])}<br>সঠিক উত্তর: ${labels[q.a]}. ${escapeHtml(q.o[q.a])}${q.note?`<br>${escapeHtml(q.note)}`:""}</div>`;
+}
+function updateStats() {
+  const answered=state.answers.filter(a=>a!==null).length;
+  $("answeredTop").textContent=answered;
+  $("unansweredTop").textContent=questions.length-answered;
+  $("progressTop").textContent=Math.round(answered/questions.length*100)+"%";
+}
+function updateNav() {
+  $("navgrid").innerHTML=questions.map((q,i)=>`<button class="navbtn ${state.answers[i]!==null?'answered':''} ${state.current===i?'current':''}" data-i="${i}" ${state.submitted?'disabled':''}>${i+1}</button>`).join("");
+  $("navgrid").querySelectorAll("button").forEach(btn=>btn.addEventListener("click",()=>{
+    state.current=Number(btn.dataset.i); $("q-"+state.current).scrollIntoView({behavior:"smooth",block:"start"}); updateNav();
+  }));
+}
+function submitExam() {
+  if(state.submitted) return;
+  const answered=state.answers.filter(a=>a!==null).length;
+  if(!confirm(`আপনি ${answered}টি প্রশ্নের উত্তর দিয়েছেন এবং ${questions.length-answered}টি উত্তর দেননি।\nপরীক্ষা জমা দিয়ে ফলাফল দেখতে চান?`)) return;
+  state.submitted=true;
+  const scored=questions.map((q,i)=>({q,i,user:state.answers[i]})).filter(x=>x.q.a!==null);
+  const correct=scored.filter(x=>x.user===x.q.a).length;
+  const wrong=scored.filter(x=>x.user!==null && x.user!==x.q.a).length;
+  const skipped=scored.filter(x=>x.user===null).length;
+  const unverified=questions.filter(q=>q.a===null).length;
+  const positive=correct, deduction=wrong*0.5, score=positive-deduction;
+  const answeredCount=state.answers.filter(a=>a!==null).length;
+  const accuracyDenom=correct+wrong;
+  $("scoreBanner").innerHTML=`<div>আপনার চূড়ান্ত স্কোর</div><strong>${score.toFixed(1)} / 100</strong><div>শুধু যাচাইকৃত উত্তরমালার প্রশ্নের ভিত্তিতে হিসাব করা হয়েছে।</div>`;
+  const cards=[
+    ["মোট প্রশ্ন",questions.length],["উত্তর দিয়েছেন",answeredCount],["উত্তর দেননি",questions.length-answeredCount],
+    ["সঠিক উত্তর",correct],["ভুল উত্তর",wrong],["ইতিবাচক নম্বর",positive.toFixed(1)],
+    ["কাটা নম্বর",deduction.toFixed(1)],["যাচাই প্রয়োজন",unverified]
+  ];
+  $("resultGrid").innerHTML=cards.map(([k,v])=>`<div class="result-card"><small>${k}</small><strong>${v}</strong></div>`).join("");
+  $("reviewNotice").textContent=`শতকরা স্কোর (১০০-এর মধ্যে): ${score.toFixed(1)}% · উত্তর দেওয়া প্রশ্নে নির্ভুলতা: ${accuracyDenom? (correct/accuracyDenom*100).toFixed(1):"0.0"}%। ${unverified}টি প্রশ্নের উত্তরমালা নিশ্চিত না হওয়ায় সেগুলো স্কোরিং থেকে বাদ রাখা হয়েছে।`;
+  $("result").classList.add("show");
+  renderQuestions();
+  $("review").innerHTML="";
+  $("questions").querySelectorAll(".question").forEach((node,i)=>{
+    const clone=node.cloneNode(true);
+    clone.querySelectorAll("input").forEach(inp=>inp.disabled=true);
+    clone.querySelectorAll(".option").forEach((opt,j)=>{
+      if(questions[i].a!==null && j===questions[i].a) opt.classList.add("correct");
+      if(state.answers[i]===j && questions[i].a!==null && j!==questions[i].a) opt.classList.add("wrong");
+    });
+    $("review").appendChild(clone);
+  });
+  $("submitBtn").disabled=true; $("clearBtn").disabled=true;
+  $("result").scrollIntoView({behavior:"smooth",block:"start"});
+  updateNav();
+}
+function resetQuiz() {
+  state.answers=Array(questions.length).fill(null); state.submitted=false; state.current=0;
+  $("result").classList.remove("show"); $("review").innerHTML="";
+  $("submitBtn").disabled=false; $("clearBtn").disabled=false;
+  renderQuestions(); updateStats(); updateNav(); window.scrollTo({top:0,behavior:"smooth"});
+}
+$("submitBtn").addEventListener("click",submitExam);
+$("clearBtn").addEventListener("click",()=>{
+  if(state.submitted) return;
+  if(confirm("সব নির্বাচিত উত্তর মুছে ফেলতে চান?")) {state.answers=Array(questions.length).fill(null);renderQuestions();updateStats();updateNav();}
+});
+$("retakeBtn").addEventListener("click",()=>{if(confirm("আবার নতুন করে পরীক্ষা শুরু করবেন?"))resetQuiz();});
+$("printBtn").addEventListener("click",()=>window.print());
+renderQuestions(); updateStats(); updateNav();
+</script>
+</body>
+</html>
